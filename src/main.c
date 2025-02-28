@@ -1,11 +1,11 @@
 #include <stdint.h>
-#include <stdio.h>
+
+#include "parse_flags.h"
 
 int32_t main(int32_t argc, char *argv[]) {
-  (void)argc;
-  (void)argv;
+  t_flags flags = parse_flags(argc, argv);
 
-  printf("Hello world\n");
+  print_flags(&flags);
 
   return 0;
 }

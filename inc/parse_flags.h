@@ -2,6 +2,7 @@
 #define PARSE_FLAGS
 
 #include <stdbool.h>
+#include <stdint.h>
 
 typedef struct {
   bool all;       // -a: Do not ignore entries starting with `.`
@@ -11,6 +12,8 @@ typedef struct {
   bool time;      // -t: Sort by time, newest first; see --time
 } t_flags;
 
-t_flags init_flags(void);
+t_flags parse_flags(int32_t, char **);
+
+void print_flags(const t_flags *flags);
 
 #endif // !PARSE_FLAGS
