@@ -3,15 +3,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
+#include "libft.h"
 #include "parse_flags.h"
 #include "quicksort.h"
 
 uint32_t count_entries(const char *path) {
   DIR *dir = opendir(path);
 
-  // TODO: Handle error
   if (!dir) {
+    perror("Error while opening dir");
     exit(1);
   }
 
@@ -29,8 +31,8 @@ uint32_t count_entries(const char *path) {
 struct dirent **get_entries(const char *path, uint32_t n) {
   DIR *dir = opendir(path);
 
-  // TODO: Handle error
   if (!dir) {
+    perror("Error while opening dir");
     exit(1);
   }
 
@@ -38,6 +40,7 @@ struct dirent **get_entries(const char *path, uint32_t n) {
   struct dirent *entry;
   struct dirent **entries = malloc(n * sizeof(struct dirent *) + 1);
   if (!entries) {
+    perror("An error occured in malloc()");
     exit(1);
   }
 
@@ -55,6 +58,10 @@ struct dirent **get_entries(const char *path, uint32_t n) {
 }
 
 void get_directory(const char *path, const t_flags flags) {
+  if (flags.recursive == true) {
+    printf("\n%s:\n", path);
+  }
+
   const uint32_t count = count_entries(path);
   struct dirent **entries = get_entries(path, count);
 
@@ -72,9 +79,32 @@ void get_directory(const char *path, const t_flags flags) {
       printf("%s\n", entries[i]->d_name);
     }
   }
-  // TODO: Check errno
 
-  // get_directory(flags);
+  if (flags.recursive == false) {
+    return;
+  }
+
+  for (int32_t i = 0; entries[i]; i++) {
+    if (ft_strcmp(entries[i]->d_name, ".") == 0 ||
+        ft_strcmp(entries[i]->d_name, "..") == 0) {
+      continue;
+    }
+
+    if (entries[i]->d_type == DT_DIR) {
+      char *next_path;
+
+      if (path[ft_strlen(path) - 1] == '/') {
+        next_path = ft_strjoin(path, entries[i]->d_name);
+      } else {
+        // TODO : Malloc prot
+        char *temp = ft_strjoin(path, "/");
+        next_path = ft_strjoin(temp, entries[i]->d_name);
+        free(temp);
+      }
+
+      get_directory(next_path, flags);
+    }
+  }
 }
 
 int32_t main(int32_t argc, char *argv[]) {
