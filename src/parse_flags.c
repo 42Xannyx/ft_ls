@@ -2,6 +2,23 @@
 
 #include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
+
+void print_help(void) {
+  printf("Usage: ft_ls [OPTION]... [FILE]...\n");
+  printf("List information about the FILEs (the current directory by "
+         "default).\n\n");
+
+  printf("Options:\n");
+  printf("  -a        do not ignore entries starting with .\n");
+  printf("  -l        use a long listing format\n");
+  printf("  -R        list subdirectories recursively\n");
+  printf("  -r        reverse order while sorting\n");
+  printf("  -t        sort by modification time, newest first\n");
+  printf("  -h        display this help and exit\n\n");
+
+  exit(0);
+}
 
 t_flags parse_flags(int32_t argc, char *argv[]) {
   t_flags flags = {0};
@@ -32,6 +49,9 @@ t_flags parse_flags(int32_t argc, char *argv[]) {
         case 't':
           flags.time = true;
           break;
+        case 'h':
+          print_help();
+          break;
         default:
           fprintf(stderr, "Unknown option: -%c\n", c);
           break;
@@ -41,18 +61,4 @@ t_flags parse_flags(int32_t argc, char *argv[]) {
   }
 
   return flags;
-}
-
-void print_flags(const t_flags *flags) {
-  if (!flags) {
-    printf("Error: NULL flags pointer\n");
-    return;
-  }
-
-  printf("Flags status:\n");
-  printf("  -a (all):       %s\n", flags->all ? "true" : "false");
-  printf("  -l (list):      %s\n", flags->list ? "true" : "false");
-  printf("  -R (recursive): %s\n", flags->recursive ? "true" : "false");
-  printf("  -r (reverse):   %s\n", flags->reverse ? "true" : "false");
-  printf("  -t (time):      %s\n", flags->time ? "true" : "false");
 }

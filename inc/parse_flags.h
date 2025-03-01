@@ -14,6 +14,4 @@ typedef struct {
 
 t_flags parse_flags(int32_t, char **);
 
-void print_flags(const t_flags *flags);
-
 #endif // !PARSE_FLAGS
