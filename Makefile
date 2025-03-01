@@ -5,15 +5,11 @@ INC_DIR := inc
 SRC_DIR := src
 OBJ_DIR := obj
 
-SRC_FILES := parse_flags.c main.c
+SRC_FILES := parse_flags.c main.c quicksort.c
 SRCS := $(addprefix $(SRC_DIR)/, $(SRC_FILES))
 OBJS := $(addprefix $(OBJ_DIR)/, $(SRC_FILES:.c=.o))
 
 all: $(NAME)
-
-debug:
-	@echo "SRCS = $(SRCS)"
-	@echo "OBJS = $(OBJS)"
 
 $(OBJ_DIR):
 	mkdir -p $@
@@ -26,6 +22,9 @@ $(NAME): $(OBJS)
 	$(CC) $(CFLAGS) -o $@ $(OBJS)
 	@echo "$(NAME) compiled successfully"
 
+CFLAGS += -g
+debug: all
+
 clean:
 	rm -rf $(OBJ_DIR)
 
@@ -34,4 +33,4 @@ fclean: clean
 
 re: fclean all
 
-.PHONY: all clean fclean re
+.PHONY: all clean fclean re debug

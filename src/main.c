@@ -5,6 +5,7 @@
 #include <string.h>
 
 #include "parse_flags.h"
+#include "quicksort.h"
 
 uint32_t count_entries(const char *path) {
   DIR *dir = opendir(path);
@@ -57,14 +58,18 @@ void get_directory(const char *path, const t_flags flags) {
   const uint32_t count = count_entries(path);
   struct dirent **entries = get_entries(path, count);
 
+  quicksort(entries, 0, count - 1);
+
   for (int32_t i = 0; entries[i]; i++) {
 
-    if (entries[i]->d_name[0] == '.' && flags.all == true) {
-      printf("%d\n", i);
-      printf("%s\n", entries[i]->d_name);
+    if (entries[i]->d_name[0] == '.') {
+
+      if (flags.all == true) {
+        printf("%s\n", entries[i]->d_name);
+      }
+
     } else {
-      /* printf("%d\n", i);
-      printf("%s\n", entries[i]->d_name); */
+      printf("%s\n", entries[i]->d_name);
     }
   }
   // TODO: Check errno
