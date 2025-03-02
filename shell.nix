@@ -8,5 +8,6 @@ pkgs.mkShell {
     gcc
     bear
     gdb
+    valgrind
   ];
 }
