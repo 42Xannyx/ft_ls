@@ -7,6 +7,7 @@
 
 #include "libft.h"
 #include "parse_flags.h"
+#include "parse_paths.h"
 #include "quicksort.h"
 
 uint32_t count_entries(const char *path) {
@@ -57,8 +58,9 @@ struct dirent **get_entries(const char *path, uint32_t n) {
   return entries;
 }
 
-void get_directory(const char *path, const t_flags flags) {
-  if (flags.recursive == true) {
+void get_directory(const char *path, const t_flags flags,
+                   uint32_t amount_paths) {
+  if (flags.recursive == true || amount_paths > 1) {
     printf("\n%s:\n", path);
   }
 
@@ -102,15 +104,19 @@ void get_directory(const char *path, const t_flags flags) {
         free(temp);
       }
 
-      get_directory(next_path, flags);
+      get_directory(next_path, flags, amount_paths);
     }
   }
 }
 
 int32_t main(int32_t argc, char *argv[]) {
   t_flags flags = parse_flags(argc, argv);
+  const char **paths = parse_paths(argv);
+  uint32_t count = count_paths(argv);
 
-  get_directory(".", flags);
+  for (int32_t i = 0; paths[i]; i++) {
+    get_directory(paths[i], flags, count);
+  }
 
   return 0;
 }
