@@ -8,7 +8,10 @@
 #include "libft.h"
 #include "parse_flags.h"
 #include "parse_paths.h"
+#include "print.h"
 #include "quicksort.h"
+
+t_flags g_flags = {0};
 
 uint32_t count_entries(const char *path) {
   DIR *dir = opendir(path);
@@ -58,10 +61,9 @@ struct dirent **get_entries(const char *path, uint32_t n) {
   return entries;
 }
 
-void get_directory(const char *path, const t_flags flags,
-                   uint32_t amount_paths) {
-  if (flags.recursive == true || amount_paths > 1) {
-    printf("\n%s:\n", path);
+void get_directory(const char *path, uint32_t amount_paths) {
+  if (g_flags.recursive == true || amount_paths > 1) {
+    print_directory((char *)path);
   }
 
   const uint32_t count = count_entries(path);
@@ -73,7 +75,7 @@ void get_directory(const char *path, const t_flags flags,
 
     if (entries[i]->d_name[0] == '.') {
 
-      if (flags.all == true) {
+      if (g_flags.all == true) {
         printf("%s\n", entries[i]->d_name);
       }
 
@@ -82,7 +84,7 @@ void get_directory(const char *path, const t_flags flags,
     }
   }
 
-  if (flags.recursive == false) {
+  if (g_flags.recursive == false) {
     return;
   }
 
@@ -104,18 +106,18 @@ void get_directory(const char *path, const t_flags flags,
         free(temp);
       }
 
-      get_directory(next_path, flags, amount_paths);
+      get_directory(next_path, amount_paths);
     }
   }
 }
 
 int32_t main(int32_t argc, char *argv[]) {
-  t_flags flags = parse_flags(argc, argv);
+  g_flags = parse_flags(argc, argv);
   const char **paths = parse_paths(argv);
   uint32_t count = count_paths(argv);
 
   for (int32_t i = 0; paths[i]; i++) {
-    get_directory(paths[i], flags, count);
+    get_directory(paths[i], count);
   }
 
   return 0;

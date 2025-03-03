@@ -1,8 +1,11 @@
 #ifndef QUICKSORT
 #define QUICKSORT
 
-void partition(struct dirent **entries, int32_t low, int32_t high);
+#include <dirent.h>
+#include <stdint.h>
 
-void quicksort(struct dirent **entries, int32_t low, int32_t high);
+void partition(struct dirent **, int32_t, int32_t);
+
+void quicksort(struct dirent **, int32_t, int32_t);
 
 #endif // !QUICKSORT

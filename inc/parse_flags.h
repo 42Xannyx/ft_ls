@@ -12,6 +12,8 @@ typedef struct {
   bool time;      // -t: Sort by time, newest first; see --time
 } t_flags;
 
+extern t_flags g_flags;
+
 t_flags parse_flags(int32_t, char **);
 
 #endif // !PARSE_FLAGS

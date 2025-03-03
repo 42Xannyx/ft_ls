@@ -1,8 +1,11 @@
-#include <ctype.h>
 #include <dirent.h>
 #include <stdint.h>
 
-int compare_entries(struct dirent *a, struct dirent *b) {
+#include "libft.h"
+#include "parse_flags.h"
+
+int32_t compare_entries(struct dirent *a, struct dirent *b) {
+  int32_t result;
   const char *a_name = a->d_name;
   const char *b_name = b->d_name;
 
@@ -12,17 +15,20 @@ int compare_entries(struct dirent *a, struct dirent *b) {
     b_name++;
 
   while (*a_name && *b_name) {
-    char a_char = tolower(*a_name);
-    char b_char = tolower(*b_name);
+    char a_char = ft_tolower(*a_name);
+    char b_char = ft_tolower(*b_name);
+    if (a_char != b_char) {
+      result = a_char - b_char;
 
-    if (a_char != b_char)
-      return a_char - b_char;
-
+      return g_flags.reverse ? -result : result;
+    }
     a_name++;
     b_name++;
   }
 
-  return tolower(*a_name) - tolower(*b_name);
+  result = ft_tolower(*a_name) - ft_tolower(*b_name);
+
+  return g_flags.reverse ? -result : result;
 }
 
 struct dirent **swap_entries(struct dirent **entries, int32_t low,

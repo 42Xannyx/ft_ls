@@ -11,7 +11,7 @@ LIBFT_INC = $(LIBFT_DIR)/INC
 LIBFT_A = $(LIBFT_DIR)/libft.a
 
 # Source files
-SRC_FILES = parse_flags.c main.c quicksort.c parse_paths.c
+SRC_FILES = parse_flags.c main.c quicksort.c parse_paths.c print.c
 SRCS = $(addprefix $(SRC_DIR)/, $(SRC_FILES))
 OBJS = $(addprefix $(OBJ_DIR)/, $(SRC_FILES:.c=.o))
 
