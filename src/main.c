@@ -79,7 +79,7 @@ void get_directory(const char *path, uint32_t amount_paths) {
   quicksort(entries, 0, count - 1);
 
   int32_t width_size = 0;
-  uint32_t width_link = 0;
+  int32_t width_link = 0;
   for (int32_t i = 0; entries[i]; i++) {
     struct stat buf = {0};
 
@@ -87,22 +87,26 @@ void get_directory(const char *path, uint32_t amount_paths) {
 
       if (g_flags.all == true) {
         get_stat(&buf, (char *)path, *entries[i]);
-        if (width_size < buf.st_size) {
-          width_size = count_digits(buf.st_size);
+        int32_t buf_size_digits = count_digits(buf.st_size);
+        if (width_size < buf_size_digits) {
+          width_size = buf_size_digits;
         }
-        if (width_link < buf.st_nlink) {
-          width_link = count_digits(buf.st_nlink);
+        int32_t buf_link_digits = count_digits(buf.st_nlink);
+        if (width_link < buf_link_digits) {
+          width_link = buf_link_digits;
         }
       }
       continue;
     }
 
     get_stat(&buf, (char *)path, *entries[i]);
-    if (width_size < buf.st_size) {
-      width_size = count_digits(buf.st_size);
+    int32_t buf_size_digits = count_digits(buf.st_size);
+    if (width_size < buf_size_digits) {
+      width_size = buf_size_digits;
     }
-    if (width_link < buf.st_nlink) {
-      width_link = count_digits(buf.st_nlink);
+    int32_t buf_link_digits = count_digits(buf.st_nlink);
+    if (width_link < buf_link_digits) {
+      width_link = buf_link_digits;
     }
   }
 
