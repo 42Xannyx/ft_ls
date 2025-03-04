@@ -1,6 +1,6 @@
 NAME = ft_ls
 
-CFLAGS = -Wall -Wextra -Werror -pedantic 
+CFLAGS = -Wall -Wextra -Werror -pedantic -g
 INC_DIR = inc
 SRC_DIR = src
 OBJ_DIR = obj

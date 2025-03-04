@@ -50,7 +50,12 @@ struct dirent **get_entries(const char *path, uint32_t n) {
 
   while ((entry = readdir(dir)) != NULL) {
     entries[i] = malloc(sizeof(struct dirent));
-    entries[i] = entry;
+    if (!entries[i]) {
+      perror("Memory allocation failed");
+      exit(1);
+    }
+
+    memcpy(entries[i], entry, sizeof(struct dirent));
 
     i += 1;
   }
@@ -76,15 +81,17 @@ void get_directory(const char *path, uint32_t amount_paths) {
     if (entries[i]->d_name[0] == '.') {
 
       if (g_flags.all == true) {
-        printf("%s\n", entries[i]->d_name);
+        print_entry(entries[i], path);
       }
-
-    } else {
-      printf("%s\n", entries[i]->d_name);
+      continue;
     }
+
+    print_entry(entries[i], path);
   }
 
   if (g_flags.recursive == false) {
+    free(entries);
+
     return;
   }
 
@@ -101,24 +108,32 @@ void get_directory(const char *path, uint32_t amount_paths) {
         next_path = ft_strjoin(path, entries[i]->d_name);
       } else {
         // TODO : Malloc prot
-        char *temp = ft_strjoin(path, "/");
+        char *temp = ft_strjoin_free((char *)path, "/");
         next_path = ft_strjoin(temp, entries[i]->d_name);
         free(temp);
       }
 
       get_directory(next_path, amount_paths);
+      free(next_path);
     }
   }
+  free(entries);
 }
 
 int32_t main(int32_t argc, char *argv[]) {
+  if (argc > MAX_PATHS) {
+    return 1;
+  }
+
   g_flags = parse_flags(argc, argv);
   const char **paths = parse_paths(argv);
   uint32_t count = count_paths(argv);
 
   for (int32_t i = 0; paths[i]; i++) {
     get_directory(paths[i], count);
+    free((char *)paths[i]);
   }
 
+  free(paths);
   return 0;
 }

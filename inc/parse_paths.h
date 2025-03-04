@@ -1,5 +1,6 @@
 #ifndef PARSE_PATHS_H
 #define PARSE_PATHS_H
+#define MAX_PATHS 256
 
 #include <stdint.h>
 
