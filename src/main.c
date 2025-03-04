@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
 #include <unistd.h>
 
 #include "libft.h"
@@ -10,6 +11,7 @@
 #include "parse_paths.h"
 #include "print.h"
 #include "quicksort.h"
+#include "utils.h"
 
 t_flags g_flags = {0};
 
@@ -76,17 +78,45 @@ void get_directory(const char *path, uint32_t amount_paths) {
 
   quicksort(entries, 0, count - 1);
 
+  int32_t width_size = 0;
+  uint32_t width_link = 0;
+  for (int32_t i = 0; entries[i]; i++) {
+    struct stat buf = {0};
+
+    if (entries[i]->d_name[0] == '.') {
+
+      if (g_flags.all == true) {
+        get_stat(&buf, (char *)path, *entries[i]);
+        if (width_size < buf.st_size) {
+          width_size = count_digits(buf.st_size);
+        }
+        if (width_link < buf.st_nlink) {
+          width_link = count_digits(buf.st_nlink);
+        }
+      }
+      continue;
+    }
+
+    get_stat(&buf, (char *)path, *entries[i]);
+    if (width_size < buf.st_size) {
+      width_size = count_digits(buf.st_size);
+    }
+    if (width_link < buf.st_nlink) {
+      width_link = count_digits(buf.st_nlink);
+    }
+  }
+
   for (int32_t i = 0; entries[i]; i++) {
 
     if (entries[i]->d_name[0] == '.') {
 
       if (g_flags.all == true) {
-        print_entry(entries[i], path);
+        print_entry(entries[i], path, width_size, width_link);
       }
       continue;
     }
 
-    print_entry(entries[i], path);
+    print_entry(entries[i], path, width_size, width_link);
   }
 
   if (g_flags.recursive == false) {

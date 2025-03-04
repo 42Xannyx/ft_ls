@@ -7,11 +7,11 @@ OBJ_DIR = obj
 
 # libft paths
 LIBFT_DIR = ./lib/libft
-LIBFT_INC = $(LIBFT_DIR)/INC
+LIBFT_INC = $(LIBFT_DIR)/inc
 LIBFT_A = $(LIBFT_DIR)/libft.a
 
 # Source files
-SRC_FILES = parse_flags.c main.c quicksort.c parse_paths.c print.c
+SRC_FILES = parse_flags.c main.c quicksort.c parse_paths.c print.c utils.c
 SRCS = $(addprefix $(SRC_DIR)/, $(SRC_FILES))
 OBJS = $(addprefix $(OBJ_DIR)/, $(SRC_FILES:.c=.o))
 

@@ -29,13 +29,11 @@ const char **parse_paths(char **argv) {
       continue;
     }
 
-    paths[i - 1] = ft_strdup(argv[i - 1]);
+    paths[i - 1] = ft_strdup(argv[i]);
     if (!paths[i - 1]) {
       perror("Error in malloc()");
       exit(1);
     }
-
-    printf("paths: %s\n", paths[i - 1]);
 
     no_path = true;
   }

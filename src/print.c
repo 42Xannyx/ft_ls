@@ -1,5 +1,6 @@
 #include <grp.h>
 #include <pwd.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/stat.h>
@@ -9,6 +10,7 @@
 #include "libft.h"
 #include "parse_flags.h"
 #include "print.h"
+#include "utils.h"
 
 #define MAX_PATH_LEN 1024
 
@@ -24,39 +26,7 @@ void print_directory(char *str) {
   }
 }
 
-void print_entry(struct dirent *entry, const char *path) {
-  if (g_flags.list == false) {
-    ft_putendl_fd(entry->d_name, STDOUT_FILENO);
-    return;
-  }
-
-  if (ft_strlen(path) + ft_strlen(entry->d_name) + 1 > MAX_PATH_LEN) {
-    return;
-  }
-
-  char full_path[MAX_PATH_LEN];
-  ft_memset(full_path, 0, MAX_PATH_LEN);
-
-  ft_strlcpy(full_path, path, MAX_PATH_LEN);
-  ft_strlcat(full_path, "/", MAX_PATH_LEN);
-  ft_strlcat(full_path, entry->d_name, MAX_PATH_LEN);
-
-  struct stat buf = {0};
-  if (stat(full_path, &buf) != 0) {
-    perror("Error in stat");
-    exit(1);
-  }
-
-  char formatted_time[13] = {0};
-  char *time = ctime(&buf.st_mtim.tv_sec);
-
-  ft_strlcpy(formatted_time, time + 4, 13);
-
-  char *size = ft_itoa(buf.st_size);
-  struct passwd *uid = getpwuid(buf.st_uid);
-  struct group *grp = getgrgid(buf.st_gid);
-
-  char permissions[11] = {0};
+void set_permission(char *permissions, struct stat buf) {
   permissions[0] = S_ISDIR(buf.st_mode)    ? 'd'
                    : S_ISLNK(buf.st_mode)  ? 'l'
                    : S_ISFIFO(buf.st_mode) ? 'p'
@@ -76,9 +46,39 @@ void print_entry(struct dirent *entry, const char *path) {
   permissions[7] = (buf.st_mode & S_IROTH) ? 'r' : '-';
   permissions[8] = (buf.st_mode & S_IWOTH) ? 'w' : '-';
   permissions[9] = (buf.st_mode & S_IXOTH) ? 'x' : '-';
+}
 
-  permissions[0] = S_ISDIR(buf.st_mode) ? 'd' : '-';
+void print_entry(struct dirent *entry, const char *path, int32_t width,
+                 uint32_t width_link) {
+  if (g_flags.list == false) {
+    ft_putendl_fd(entry->d_name, STDOUT_FILENO);
+    return;
+  }
 
-  printf("%s %ld %s %s %5s %s %s\n", permissions, buf.st_nlink, uid->pw_name,
-         grp->gr_name, size, formatted_time, entry->d_name);
+  if (ft_strlen(path) + ft_strlen(entry->d_name) + 1 > MAX_PATH_LEN) {
+    return;
+  }
+
+  struct stat buf = {0};
+  get_stat(&buf, (char *)path, *entry);
+
+  char formatted_time[13] = {0};
+  char *time = ctime(&buf.st_mtim.tv_sec);
+
+  ft_strlcpy(formatted_time, time + 4, 13);
+
+  char *size = ft_ltoa(buf.st_size);
+  if (!size) {
+    exit(1);
+  }
+
+  struct passwd *uid = getpwuid(buf.st_uid);
+  struct group *grp = getgrgid(buf.st_gid);
+
+  char permissions[11] = {0};
+  set_permission(permissions, buf);
+
+  printf("%s %*ld %s %s %*ld %s %s\n", permissions, width_link, buf.st_nlink,
+         uid->pw_name, grp->gr_name, width, buf.st_size, formatted_time,
+         entry->d_name);
 }
