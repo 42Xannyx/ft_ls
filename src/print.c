@@ -69,6 +69,7 @@ void print_entry(struct dirent *entry, const char *path, int32_t width,
 
   char *size = ft_ltoa(buf.st_size);
   if (!size) {
+    perror("ft_ls: Error in converting st_size");
     exit(1);
   }
 
@@ -78,7 +79,27 @@ void print_entry(struct dirent *entry, const char *path, int32_t width,
   char permissions[11] = {0};
   set_permission(permissions, buf);
 
-  printf("%s %*ld %s %s %*ld %s %s\n", permissions, width_link, buf.st_nlink,
-         uid->pw_name, grp->gr_name, width, buf.st_size, formatted_time,
-         entry->d_name);
+  ft_putstr_fd(permissions, STDERR_FILENO);
+
+  for (uint32_t i = 0; i <= width_link - count_digits(buf.st_nlink); i++) {
+    ft_putchar_fd(' ', STDERR_FILENO);
+  }
+
+  ft_putnbr_fd(buf.st_nlink, STDERR_FILENO);
+  ft_putchar_fd(' ', STDERR_FILENO);
+  ft_putstr_fd(uid->pw_name, STDERR_FILENO);
+  ft_putchar_fd(' ', STDERR_FILENO);
+  ft_putstr_fd(grp->gr_name, STDERR_FILENO);
+
+  for (int32_t i = 0; i <= width - count_digits(buf.st_size); i++) {
+    ft_putchar_fd(' ', STDERR_FILENO);
+  }
+
+  ft_putnbr_fd(buf.st_size, STDERR_FILENO);
+  ft_putchar_fd(' ', STDERR_FILENO);
+  ft_putstr_fd(formatted_time, STDERR_FILENO);
+  ft_putchar_fd(' ', STDERR_FILENO);
+  ft_putendl_fd(entry->d_name, STDERR_FILENO);
+
+  free(size);
 }

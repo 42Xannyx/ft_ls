@@ -57,7 +57,7 @@ struct dirent **get_entries(const char *path, uint32_t n) {
       exit(1);
     }
 
-    memcpy(entries[i], entry, sizeof(struct dirent));
+    ft_memcpy(entries[i], entry, sizeof(struct dirent));
 
     i += 1;
   }
@@ -76,47 +76,39 @@ void get_directory(const char *path, uint32_t amount_paths) {
   const uint32_t count = count_entries(path);
   struct dirent **entries = get_entries(path, count);
 
-  quicksort(entries, 0, count - 1);
+  quicksort((char *)path, entries, 0, count - 1);
 
   int32_t width_size = 0;
   int32_t width_link = 0;
+  int32_t blocks = 0;
   for (int32_t i = 0; entries[i]; i++) {
     struct stat buf = {0};
 
-    if (entries[i]->d_name[0] == '.') {
-
-      if (g_flags.all == true) {
-        get_stat(&buf, (char *)path, *entries[i]);
-        int32_t buf_size_digits = count_digits(buf.st_size);
-        if (width_size < buf_size_digits) {
-          width_size = buf_size_digits;
-        }
-        int32_t buf_link_digits = count_digits(buf.st_nlink);
-        if (width_link < buf_link_digits) {
-          width_link = buf_link_digits;
-        }
-      }
+    if (entries[i]->d_name[0] == '.' && g_flags.all == false) {
       continue;
     }
 
     get_stat(&buf, (char *)path, *entries[i]);
+
+    blocks += buf.st_blocks;
     int32_t buf_size_digits = count_digits(buf.st_size);
     if (width_size < buf_size_digits) {
       width_size = buf_size_digits;
     }
+
     int32_t buf_link_digits = count_digits(buf.st_nlink);
     if (width_link < buf_link_digits) {
       width_link = buf_link_digits;
     }
   }
 
+  ft_putstr_fd("total ", STDOUT_FILENO);
+  char *block_str = ft_itoa(blocks / 2);
+  ft_putendl_fd(block_str, STDOUT_FILENO);
+  free(block_str);
+
   for (int32_t i = 0; entries[i]; i++) {
-
-    if (entries[i]->d_name[0] == '.') {
-
-      if (g_flags.all == true) {
-        print_entry(entries[i], path, width_size, width_link);
-      }
+    if (entries[i]->d_name[0] == '.' && g_flags.all == false) {
       continue;
     }
 
@@ -124,6 +116,9 @@ void get_directory(const char *path, uint32_t amount_paths) {
   }
 
   if (g_flags.recursive == false) {
+    for (int32_t i = 0; entries[i]; i++) {
+      free(entries[i]);
+    }
     free(entries);
 
     return;
@@ -135,22 +130,28 @@ void get_directory(const char *path, uint32_t amount_paths) {
       continue;
     }
 
-    if (entries[i]->d_type == DT_DIR) {
-      char *next_path;
-
-      if (path[ft_strlen(path) - 1] == '/') {
-        next_path = ft_strjoin(path, entries[i]->d_name);
-      } else {
-        // TODO : Malloc prot
-        char *temp = ft_strjoin_free((char *)path, "/");
-        next_path = ft_strjoin(temp, entries[i]->d_name);
-        free(temp);
-      }
-
-      get_directory(next_path, amount_paths);
-      free(next_path);
+    if (entries[i]->d_type != DT_DIR) {
+      continue;
     }
+
+    if (g_flags.all == false && entries[i]->d_name[0] == '.') {
+      continue;
+    }
+
+    char *next_path = ft_calloc(sizeof(char), MAX_PATH_LEN);
+    if (!next_path) {
+      perror("ft_ls: memory allocation failed");
+      exit(1);
+    }
+
+    ft_strlcpy(next_path, path, MAX_PATH_LEN);
+    ft_strlcat(next_path, "/", MAX_PATH_LEN);
+    ft_strlcat(next_path, entries[i]->d_name, MAX_PATH_LEN);
+
+    get_directory(next_path, amount_paths);
+    free(next_path);
   }
+
   free(entries);
 }
 

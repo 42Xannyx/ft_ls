@@ -3,8 +3,9 @@
 
 #include "libft.h"
 #include "parse_flags.h"
+#include "utils.h"
 
-int32_t compare_entries(struct dirent *a, struct dirent *b) {
+int32_t compare_entries(char *path, struct dirent *a, struct dirent *b) {
   int32_t result;
   const char *a_name = a->d_name;
   const char *b_name = b->d_name;
@@ -13,6 +14,20 @@ int32_t compare_entries(struct dirent *a, struct dirent *b) {
     a_name++;
   if (b_name[0] == '.')
     b_name++;
+
+  if (g_flags.time == true) {
+    struct stat buf_a = {0};
+    struct stat buf_b = {0};
+
+    get_stat(&buf_a, path, *a);
+    get_stat(&buf_b, path, *b);
+
+    if (buf_a.st_mtim.tv_sec != buf_b.st_mtim.tv_sec) {
+      return buf_b.st_mtim.tv_sec - buf_a.st_mtim.tv_sec;
+    }
+
+    return buf_b.st_mtim.tv_nsec - buf_a.st_mtim.tv_nsec;
+  }
 
   while (*a_name && *b_name) {
     char a_char = ft_tolower(*a_name);
@@ -40,12 +55,13 @@ struct dirent **swap_entries(struct dirent **entries, int32_t low,
   return entries;
 }
 
-int32_t partition(struct dirent **entries, int32_t low, int32_t high) {
+int32_t partition(char *path, struct dirent **entries, int32_t low,
+                  int32_t high) {
   struct dirent *pivot = entries[high];
   int32_t i = low - 1;
 
   for (int32_t j = low; j < high; j++) {
-    if (compare_entries(entries[j], pivot) <= 0) {
+    if (compare_entries(path, entries[j], pivot) <= 0) {
       i += 1;
       swap_entries(entries, i, j);
     }
@@ -55,11 +71,11 @@ int32_t partition(struct dirent **entries, int32_t low, int32_t high) {
   return i + 1;
 }
 
-void quicksort(struct dirent **entries, int32_t low, int32_t high) {
+void quicksort(char *path, struct dirent **entries, int32_t low, int32_t high) {
   if (low < high) {
-    int32_t pivot = partition(entries, low, high);
+    int32_t pivot = partition(path, entries, low, high);
 
-    quicksort(entries, low, pivot - 1);
-    quicksort(entries, pivot + 1, high);
+    quicksort(path, entries, low, pivot - 1);
+    quicksort(path, entries, pivot + 1, high);
   }
 }
