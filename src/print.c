@@ -1,30 +1,15 @@
 #include <grp.h>
 #include <pwd.h>
 #include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include <sys/stat.h>
 #include <time.h>
 #include <unistd.h>
 
+#include "ft_printf.h"
 #include "libft.h"
 #include "parse_flags.h"
 #include "print.h"
 #include "utils.h"
-
-#define MAX_PATH_LEN 1024
-
-void print_directory(char *str) {
-  if (write(STDOUT_FILENO, "\n", 1) < 0) {
-    perror("write error");
-  }
-
-  ft_putstr_fd(str, STDOUT_FILENO);
-
-  if (write(STDOUT_FILENO, ":\n", 2) < 0) {
-    perror("write error");
-  }
-}
 
 void set_permission(char *permissions, struct stat buf) {
   permissions[0] = S_ISDIR(buf.st_mode)    ? 'd'
@@ -55,10 +40,6 @@ void print_entry(struct dirent *entry, const char *path, int32_t width,
     return;
   }
 
-  if (ft_strlen(path) + ft_strlen(entry->d_name) + 1 > MAX_PATH_LEN) {
-    return;
-  }
-
   struct stat buf = {0};
   get_stat(&buf, (char *)path, *entry);
 
@@ -67,39 +48,23 @@ void print_entry(struct dirent *entry, const char *path, int32_t width,
 
   ft_strlcpy(formatted_time, time + 4, 13);
 
-  char *size = ft_ltoa(buf.st_size);
-  if (!size) {
-    perror("ft_ls: Error in converting st_size");
-    exit(1);
-  }
-
   struct passwd *uid = getpwuid(buf.st_uid);
   struct group *grp = getgrgid(buf.st_gid);
 
   char permissions[11] = {0};
   set_permission(permissions, buf);
 
-  ft_putstr_fd(permissions, STDERR_FILENO);
+  ft_printf("%s", permissions);
 
   for (uint32_t i = 0; i <= width_link - count_digits(buf.st_nlink); i++) {
     ft_putchar_fd(' ', STDERR_FILENO);
   }
 
-  ft_putnbr_fd(buf.st_nlink, STDERR_FILENO);
-  ft_putchar_fd(' ', STDERR_FILENO);
-  ft_putstr_fd(uid->pw_name, STDERR_FILENO);
-  ft_putchar_fd(' ', STDERR_FILENO);
-  ft_putstr_fd(grp->gr_name, STDERR_FILENO);
+  ft_printf("%d %s %s", buf.st_nlink, uid->pw_name, grp->gr_name);
 
   for (int32_t i = 0; i <= width - count_digits(buf.st_size); i++) {
     ft_putchar_fd(' ', STDERR_FILENO);
   }
 
-  ft_putnbr_fd(buf.st_size, STDERR_FILENO);
-  ft_putchar_fd(' ', STDERR_FILENO);
-  ft_putstr_fd(formatted_time, STDERR_FILENO);
-  ft_putchar_fd(' ', STDERR_FILENO);
-  ft_putendl_fd(entry->d_name, STDERR_FILENO);
-
-  free(size);
+  ft_printf("%d %s %s\n", buf.st_size, formatted_time, entry->d_name);
 }

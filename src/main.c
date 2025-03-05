@@ -6,6 +6,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+#include "ft_printf.h"
 #include "libft.h"
 #include "parse_flags.h"
 #include "parse_paths.h"
@@ -70,7 +71,7 @@ struct dirent **get_entries(const char *path, uint32_t n) {
 
 void get_directory(const char *path, uint32_t amount_paths) {
   if (g_flags.recursive == true || amount_paths > 1) {
-    print_directory((char *)path);
+    ft_printf("\n%s:\n", path);
   }
 
   const uint32_t count = count_entries(path);
@@ -102,10 +103,9 @@ void get_directory(const char *path, uint32_t amount_paths) {
     }
   }
 
-  ft_putstr_fd("total ", STDOUT_FILENO);
-  char *block_str = ft_itoa(blocks / 2);
-  ft_putendl_fd(block_str, STDOUT_FILENO);
-  free(block_str);
+  if (g_flags.list == true) {
+    ft_printf("total %d\n", blocks / 2);
+  }
 
   for (int32_t i = 0; entries[i]; i++) {
     if (entries[i]->d_name[0] == '.' && g_flags.all == false) {
@@ -150,6 +150,10 @@ void get_directory(const char *path, uint32_t amount_paths) {
 
     get_directory(next_path, amount_paths);
     free(next_path);
+  }
+
+  for (int32_t i = 0; entries[i]; i++) {
+    free(entries[i]);
   }
 
   free(entries);

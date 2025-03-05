@@ -21,31 +21,39 @@ uint32_t count_paths(char **argv) {
 }
 
 const char **parse_paths(char **argv) {
-  bool no_path = false;
-  const char **paths = ft_calloc(1, MAX_PATHS * sizeof(char *));
+  int32_t len = 0;
+  bool no_path = true;
+  const char **paths = ft_calloc(sizeof(char *), MAX_PATHS);
+  if (!paths) {
+    perror("Error in calloc()");
+    exit(1);
+  }
 
   for (int32_t i = 1; argv[i]; i++) {
     if (argv[i][0] == '-') {
       continue;
     }
 
-    paths[i - 1] = ft_strdup(argv[i]);
-    if (!paths[i - 1]) {
+    paths[len] = ft_strdup(argv[i]);
+    if (!paths[len]) {
       perror("Error in malloc()");
       exit(1);
     }
 
-    no_path = true;
+    no_path = false;
+    len += 1;
   }
 
-  if (no_path == false) {
+  if (no_path == true) {
     paths[0] = ft_strdup(".");
-
     if (!paths[0]) {
       perror("Error in malloc()");
       exit(1);
     }
+    len += 1;
   }
+
+  paths[len] = NULL;
 
   return (const char **)paths;
 }
