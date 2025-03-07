@@ -70,6 +70,18 @@ struct dirent **get_entries(const char *path, uint32_t n) {
 }
 
 void get_directory(const char *path, uint32_t amount_paths) {
+  struct stat buf = {0};
+  if (stat(path, &buf) < 0) {
+    perror("Error in stat()");
+    exit(1);
+  }
+
+  if (!S_ISDIR(buf.st_mode)) {
+    print_file((char *)path, buf, count_digits(buf.st_size), 1);
+
+    return;
+  }
+
   if (g_flags.recursive == true || amount_paths > 1) {
     ft_printf("\n%s:\n", path);
   }
